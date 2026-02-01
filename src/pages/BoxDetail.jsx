@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { boxesApi, boxAgentsApi, agentsApi } from '../services/api'
+import { boxesApi, boxAgentsApi } from '../services/api'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
-import Terminal from '../components/Terminal/Terminal'
 
 const tierNames = {
   basic: 'Basic',
@@ -15,7 +14,6 @@ const tierNames = {
 export default function BoxDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [showTerminal, setShowTerminal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -154,22 +152,12 @@ export default function BoxDetail() {
               {tierNames[box.tier] || box.tier} • {box.region}
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            {isRunning && (
-              <Button
-                variant="secondary"
-                onClick={() => setShowTerminal(!showTerminal)}
-              >
-                {showTerminal ? 'Hide Terminal' : 'Open Terminal'}
-              </Button>
-            )}
-            <Button
-              variant="danger"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              Delete Box
-            </Button>
-          </div>
+          <Button
+            variant="danger"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            Delete Box
+          </Button>
         </div>
 
         {/* Status Message */}
@@ -293,21 +281,6 @@ export default function BoxDetail() {
             </Card>
           </div>
         </div>
-
-        {/* Terminal */}
-        {showTerminal && isRunning && (
-          <Card className="mt-8">
-            <CardHeader>
-              <h2 className="text-xl font-semibold">Terminal</h2>
-            </CardHeader>
-            <CardBody className="p-0">
-              <Terminal
-                endpoint={`/ws/terminal/${id}`}
-                className="h-[500px]"
-              />
-            </CardBody>
-          </Card>
-        )}
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
