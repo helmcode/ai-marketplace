@@ -11,22 +11,24 @@ export default function Dashboard() {
   const [notification, setNotification] = useState(null)
   const { data: boxes, loading, error, execute } = useApiCall(boxesApi.list)
 
-  // Load boxes on mount and when navigating back
+  // Load boxes on mount
   useEffect(() => {
     execute()
-  }, [execute, location.key])
+  }, [execute])
 
   // Handle notification from navigation state (e.g., after deleting a box)
   useEffect(() => {
     if (location.state?.message) {
       setNotification({ message: location.state.message, type: location.state.type || 'info' })
+      // Refresh the boxes list
+      execute()
       // Clear the state so it doesn't show again on refresh
       window.history.replaceState({}, document.title)
       // Auto-dismiss after 5 seconds
       const timer = setTimeout(() => setNotification(null), 5000)
       return () => clearTimeout(timer)
     }
-  }, [location.state])
+  }, [location.state, execute])
 
   return (
     <div className="py-12">
