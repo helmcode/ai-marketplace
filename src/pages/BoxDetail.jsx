@@ -79,10 +79,12 @@ export default function BoxDetail() {
     setDeleting(true)
     try {
       await boxesApi.delete(id)
-      navigate('/dashboard')
+      navigate('/dashboard', { state: { message: `Box "${box.name}" deleted successfully`, type: 'success' } })
     } catch (err) {
       console.error('Failed to delete box:', err)
+      setError('Failed to delete box. Please try again.')
       setDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 

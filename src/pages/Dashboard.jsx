@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { boxesApi } from '../services/api'
 import { useApiCall } from '../hooks/useApi'
 import Card, { CardBody } from '../components/ui/Card'
@@ -7,15 +7,52 @@ import Button from '../components/ui/Button'
 import BoxCard from '../components/boxes/BoxCard'
 
 export default function Dashboard() {
+  const location = useLocation()
+  const [notification, setNotification] = useState(null)
   const { data: boxes, loading, error, execute } = useApiCall(boxesApi.list)
 
+  // Load boxes on mount and when navigating back
   useEffect(() => {
     execute()
-  }, [execute])
+  }, [execute, location.key])
+
+  // Handle notification from navigation state (e.g., after deleting a box)
+  useEffect(() => {
+    if (location.state?.message) {
+      setNotification({ message: location.state.message, type: location.state.type || 'info' })
+      // Clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title)
+      // Auto-dismiss after 5 seconds
+      const timer = setTimeout(() => setNotification(null), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [location.state])
 
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Notification */}
+        {notification && (
+          <div
+            className={`mb-6 p-4 rounded-lg flex items-center justify-between ${
+              notification.type === 'success'
+                ? 'bg-green-900/50 border border-green-700 text-green-300'
+                : 'bg-blue-900/50 border border-blue-700 text-blue-300'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <span>{notification.type === 'success' ? '✓' : 'ℹ'}</span>
+              <span>{notification.message}</span>
+            </div>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">My Boxes</h1>
