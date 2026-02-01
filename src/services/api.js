@@ -39,11 +39,25 @@ export const agentsApi = {
   get: (slug) => api.get(`/api/agents/${slug}`),
 }
 
-export const deploymentsApi = {
-  list: () => api.get('/api/deployments'),
-  get: (id) => api.get(`/api/deployments/${id}`),
-  create: (data) => api.post('/api/deployments', data),
-  delete: (id) => api.delete(`/api/deployments/${id}`),
+export const tiersApi = {
+  list: () => api.get('/api/tiers'),
+}
+
+export const boxesApi = {
+  list: () => api.get('/api/boxes'),
+  get: (id) => api.get(`/api/boxes/${id}`),
+  create: (data) => api.post('/api/boxes', data),
+  update: (id, data) => api.put(`/api/boxes/${id}`, data),
+  delete: (id) => api.delete(`/api/boxes/${id}`),
+}
+
+export const boxAgentsApi = {
+  list: (boxId) => api.get(`/api/boxes/${boxId}/agents`),
+  get: (boxId, agentId) => api.get(`/api/boxes/${boxId}/agents/${agentId}`),
+  install: (boxId, data) => api.post(`/api/boxes/${boxId}/agents`, data),
+  update: (boxId, agentId, data) => api.put(`/api/boxes/${boxId}/agents/${agentId}`, data),
+  delete: (boxId, agentId) => api.delete(`/api/boxes/${boxId}/agents/${agentId}`),
+  getLog: (boxId, agentId) => api.get(`/api/boxes/${boxId}/agents/${agentId}/log`),
 }
 
 export const usersApi = {

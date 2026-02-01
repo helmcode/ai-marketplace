@@ -6,7 +6,11 @@ import Home from './pages/Home'
 import Marketplace from './pages/Marketplace'
 import AgentDetail from './pages/AgentDetail'
 import Dashboard from './pages/Dashboard'
-import DeploymentDetail from './pages/DeploymentDetail'
+import BoxCreate from './pages/BoxCreate'
+import BoxDetail from './pages/BoxDetail'
+import AgentInstall from './pages/AgentInstall'
+import AgentSetup from './pages/AgentSetup'
+import AgentTUI from './pages/AgentTUI'
 import Callback from './pages/Callback'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -36,11 +40,44 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Box routes */}
         <Route
-          path="/dashboard/:id"
+          path="/boxes/create"
           element={
             <ProtectedRoute>
-              <DeploymentDetail />
+              <BoxCreate />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/boxes/:id"
+          element={
+            <ProtectedRoute>
+              <BoxDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/boxes/:id/install"
+          element={
+            <ProtectedRoute>
+              <AgentInstall />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/boxes/:boxId/agents/:agentId/setup"
+          element={
+            <ProtectedRoute>
+              <AgentSetup />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/boxes/:boxId/agents/:agentId/tui"
+          element={
+            <ProtectedRoute>
+              <AgentTUI />
             </ProtectedRoute>
           }
         />

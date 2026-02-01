@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 
 const Input = forwardRef(function Input(
-  { label, error, className = '', type = 'text', ...props },
+  { label, error, helperText, className = '', type = 'text', ...props },
   ref
 ) {
   return (
@@ -13,6 +13,7 @@ const Input = forwardRef(function Input(
         className={`input ${error ? 'border-red-500 focus:ring-red-500' : ''} ${className}`}
         {...props}
       />
+      {helperText && !error && <p className="text-sm text-gray-400">{helperText}</p>}
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   )

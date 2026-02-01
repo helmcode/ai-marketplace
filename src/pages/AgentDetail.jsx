@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import ReactMarkdown from 'react-markdown'
-import { agentsApi, deploymentsApi, usersApi } from '../services/api'
+import { agentsApi, boxesApi } from '../services/api'
 import { useApiCall } from '../hooks/useApi'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
-import Input from '../components/ui/Input'
-import Select from '../components/ui/Select'
 import Badge from '../components/ui/Badge'
 
 export default function AgentDetail() {
@@ -16,13 +14,7 @@ export default function AgentDetail() {
   const { isAuthenticated, loginWithRedirect } = useAuth0()
 
   const { data: agent, loading, error, execute } = useApiCall(agentsApi.get)
-  const { data: user, execute: fetchUser } = useApiCall(usersApi.me)
-  const { execute: createDeployment, loading: deploying } = useApiCall(deploymentsApi.create)
-  const { execute: updateUser } = useApiCall(usersApi.update)
-
-  const [config, setConfig] = useState({})
-  const [sshKey, setSshKey] = useState('')
-  const [deployError, setDeployError] = useState(null)
+  const { data: boxes, execute: loadBoxes } = useApiCall(boxesApi.list)
 
   useEffect(() => {
     execute(slug)
@@ -30,59 +22,24 @@ export default function AgentDetail() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchUser()
+      loadBoxes()
     }
-  }, [isAuthenticated, fetchUser])
+  }, [isAuthenticated, loadBoxes])
 
-  useEffect(() => {
-    if (user?.ssh_public_key) {
-      setSshKey(user.ssh_public_key)
-    }
-  }, [user])
-
-  useEffect(() => {
-    if (agent?.config_schema?.properties) {
-      const defaults = {}
-      Object.entries(agent.config_schema.properties).forEach(([key, prop]) => {
-        if (prop.default !== undefined) {
-          defaults[key] = prop.default
-        }
-      })
-      setConfig(defaults)
-    }
-  }, [agent])
-
-  const handleConfigChange = (key, value) => {
-    setConfig((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const handleDeploy = async () => {
+  const handleInstallClick = (boxId) => {
     if (!isAuthenticated) {
       loginWithRedirect({ appState: { returnTo: window.location.pathname } })
       return
     }
+    navigate(`/boxes/${boxId}/install`)
+  }
 
-    setDeployError(null)
-
-    try {
-      if (sshKey && sshKey !== user?.ssh_public_key) {
-        await updateUser({ ssh_public_key: sshKey })
-      }
-
-      if (!sshKey) {
-        setDeployError('SSH public key is required')
-        return
-      }
-
-      const result = await createDeployment({
-        agent_slug: slug,
-        config,
-      })
-
-      navigate(`/dashboard/${result.id}`)
-    } catch (err) {
-      setDeployError(err.response?.data?.detail || 'Failed to deploy agent')
+  const handleCreateBox = () => {
+    if (!isAuthenticated) {
+      loginWithRedirect({ appState: { returnTo: '/boxes/create' } })
+      return
     }
+    navigate('/boxes/create')
   }
 
   if (loading) {
@@ -104,9 +61,7 @@ export default function AgentDetail() {
 
   if (!agent) return null
 
-  const schema = agent.config_schema || {}
-  const properties = schema.properties || {}
-  const price = agent.base_price / 100
+  const runningBoxes = boxes?.filter(b => b.status === 'running') || []
 
   return (
     <div className="py-12">
@@ -119,9 +74,14 @@ export default function AgentDetail() {
           <div>
             <h1 className="text-3xl font-bold mb-2">{agent.name}</h1>
             <p className="text-gray-400 mb-3">{agent.description}</p>
-            <Badge variant="info" className="text-base px-3 py-1">
-              ${price}/month
-            </Badge>
+            <div className="flex items-center space-x-3">
+              {agent.install_script_url && (
+                <Badge variant="success">One-Click Install</Badge>
+              )}
+              {agent.tui_command && (
+                <Badge variant="info">TUI Available</Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -136,107 +96,100 @@ export default function AgentDetail() {
           </Card>
         )}
 
-        {/* Configuration Form */}
+        {/* Installation Info */}
         <Card className="mb-8">
           <CardHeader>
-            <h2 className="text-xl font-semibold">Configuration</h2>
+            <h2 className="text-xl font-semibold">Installation</h2>
           </CardHeader>
-          <CardBody className="space-y-6">
-            {Object.entries(properties).map(([key, prop]) => (
-              <ConfigField
-                key={key}
-                name={key}
-                property={prop}
-                value={config[key] || ''}
-                onChange={(value) => handleConfigChange(key, value)}
-                allConfig={config}
-              />
-            ))}
+          <CardBody className="space-y-4">
+            <p className="text-gray-400">
+              This agent is installed in a Box. The installation is fully automated.
+            </p>
+
+            {agent.install_command && (
+              <div className="bg-surface-secondary rounded-lg p-4">
+                <p className="text-sm text-gray-400 mb-2">Install command:</p>
+                <code className="text-sm text-accent-secondary break-all">
+                  {agent.install_command}
+                </code>
+              </div>
+            )}
+
+            {agent.tui_command && (
+              <div className="bg-surface-secondary rounded-lg p-4">
+                <p className="text-sm text-gray-400 mb-2">TUI command:</p>
+                <code className="text-sm text-accent-secondary">
+                  {agent.tui_command}
+                </code>
+              </div>
+            )}
           </CardBody>
         </Card>
 
-        {/* SSH Key */}
-        <Card className="mb-8">
+        {/* Install Options */}
+        <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold">SSH Access</h2>
+            <h2 className="text-xl font-semibold">Install {agent.name}</h2>
           </CardHeader>
           <CardBody>
-            <p className="text-gray-400 text-sm mb-4">
-              Provide your SSH public key to access the server. You can find it in{' '}
-              <code className="text-accent-secondary">~/.ssh/id_rsa.pub</code> or{' '}
-              <code className="text-accent-secondary">~/.ssh/id_ed25519.pub</code>
-            </p>
-            <textarea
-              className="input min-h-[100px] font-mono text-sm"
-              placeholder="ssh-rsa AAAA... or ssh-ed25519 AAAA..."
-              value={sshKey}
-              onChange={(e) => setSshKey(e.target.value)}
-            />
+            {!isAuthenticated ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 mb-4">
+                  Log in to install this agent in your box
+                </p>
+                <Button onClick={() => loginWithRedirect({ appState: { returnTo: window.location.pathname } })}>
+                  Log In to Continue
+                </Button>
+              </div>
+            ) : runningBoxes.length > 0 ? (
+              <div className="space-y-4">
+                <p className="text-gray-400">
+                  Select a box to install {agent.name}:
+                </p>
+                <div className="grid gap-3">
+                  {runningBoxes.map((box) => (
+                    <button
+                      key={box.id}
+                      onClick={() => handleInstallClick(box.id)}
+                      className="flex items-center justify-between p-4 bg-surface-secondary rounded-lg hover:bg-surface-border transition-colors text-left"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-accent flex items-center justify-center text-xl">
+                          📦
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{box.name}</h3>
+                          <p className="text-sm text-gray-400">
+                            {box.tier} • {box.ip_address}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-accent-primary">
+                        Install →
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-surface-border pt-4 mt-4">
+                  <Button variant="secondary" onClick={handleCreateBox} className="w-full">
+                    Create New Box
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">📦</div>
+                <p className="text-gray-400 mb-4">
+                  You need a box to install agents. Create one first!
+                </p>
+                <Button onClick={handleCreateBox}>
+                  Create Your First Box
+                </Button>
+              </div>
+            )}
           </CardBody>
         </Card>
-
-        {/* Deploy Button */}
-        {deployError && (
-          <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400">
-            {deployError}
-          </div>
-        )}
-
-        <div className="flex justify-end">
-          <Button
-            size="lg"
-            onClick={handleDeploy}
-            loading={deploying}
-            disabled={deploying}
-          >
-            {isAuthenticated ? 'Deploy Agent' : 'Login to Deploy'}
-          </Button>
-        </div>
       </div>
     </div>
-  )
-}
-
-function ConfigField({ name, property, value, onChange, allConfig }) {
-  const { type, title, description, format } = property
-
-  if (property.dependsOn && property.options) {
-    const dependsValue = allConfig[property.dependsOn]
-    const options = property.options[dependsValue] || []
-
-    return (
-      <Select
-        label={title || name}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        options={options}
-      />
-    )
-  }
-
-  if (property.enum) {
-    const options = property.enum.map((val) => ({
-      value: val,
-      label: property.enumLabels?.[val] || val,
-    }))
-
-    return (
-      <Select
-        label={title || name}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        options={options}
-      />
-    )
-  }
-
-  return (
-    <Input
-      label={title || name}
-      type={format === 'password' ? 'password' : 'text'}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={description}
-    />
   )
 }
