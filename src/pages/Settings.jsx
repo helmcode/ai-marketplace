@@ -125,8 +125,8 @@ export default function Settings() {
                   value={sshKey}
                   onChange={(e) => setSshKey(e.target.value)}
                   placeholder="ssh-rsa AAAA... or ssh-ed25519 AAAA..."
-                  className="w-full h-32 px-4 py-3 bg-surface-secondary border border-gray-700 rounded-lg
-                           text-white placeholder-gray-500 font-mono text-sm
+                  className="w-full h-32 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg
+                           text-gray-100 placeholder-gray-500 font-mono text-sm
                            focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-transparent
                            resize-none"
                 />
