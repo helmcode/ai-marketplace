@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { boxesApi, boxAgentsApi, usersApi } from '../services/api'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
-import Badge from '../components/ui/Badge'
+import StatusIndicator from '../components/ui/StatusIndicator'
 
 const tierNames = {
   basic: 'Basic',
@@ -94,7 +94,7 @@ export default function BoxDetail() {
     setDeleting(true)
     try {
       await boxesApi.delete(id)
-      navigate('/dashboard', { state: { message: `Box "${box.name}" deleted successfully`, type: 'success' } })
+      navigate('/dashboard', { state: { deletedBoxId: id } })
     } catch (err) {
       console.error('Failed to delete box:', err)
       setError('Failed to delete box. Please try again.')
@@ -103,34 +103,6 @@ export default function BoxDetail() {
     }
   }
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case 'running':
-        return 'success'
-      case 'pending':
-      case 'provisioning':
-        return 'warning'
-      case 'failed':
-      case 'deleted':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
-
-  const getAgentStatusVariant = (status) => {
-    switch (status) {
-      case 'running':
-        return 'success'
-      case 'pending':
-      case 'installing':
-        return 'warning'
-      case 'failed':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
 
   if (loading) {
     return (
@@ -161,9 +133,7 @@ export default function BoxDetail() {
           <div>
             <div className="flex items-center space-x-4 mb-2">
               <h1 className="text-3xl font-bold">{box.name}</h1>
-              <Badge variant={getStatusVariant(box.status)}>
-                {box.status}
-              </Badge>
+              <StatusIndicator status={box.status} />
             </div>
             <p className="text-gray-400">
               {tierNames[box.tier] || box.tier} • {box.region}
@@ -223,14 +193,9 @@ export default function BoxDetail() {
                     <p className="text-gray-500 text-sm mt-1">Available when running</p>
                   ) : !user?.ssh_public_key ? (
                     <div className="mt-1">
-                      <p className="text-gray-500 text-sm mb-2">
-                        Configure your SSH public key to enable SSH access
+                      <p className="text-gray-500 text-sm">
+                        Configure your SSH key in Settings (click your profile in the sidebar)
                       </p>
-                      <Link to="/settings">
-                        <Button size="sm" variant="secondary">
-                          Configure SSH Key
-                        </Button>
-                      </Link>
                     </div>
                   ) : !box.user_ssh_synced ? (
                     <div className="mt-1">
@@ -297,9 +262,7 @@ export default function BoxDetail() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-4">
-                          <Badge variant={getAgentStatusVariant(agent.status)}>
-                            {agent.status}
-                          </Badge>
+                          <StatusIndicator status={agent.status} size="sm" />
                           {agent.status === 'pending' && (
                             <Link to={`/boxes/${id}/agents/${agent.id}/setup`}>
                               <Button size="sm" variant="secondary">

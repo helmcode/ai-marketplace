@@ -8,53 +8,41 @@ import BoxCard from '../components/boxes/BoxCard'
 
 export default function Dashboard() {
   const location = useLocation()
-  const [notification, setNotification] = useState(null)
-  const { data: boxes, loading, error, execute } = useApiCall(boxesApi.list)
+  const [deletingBoxId, setDeletingBoxId] = useState(null)
+  const { data: boxes, loading, error, execute, setData } = useApiCall(boxesApi.list)
 
   // Load boxes on mount
   useEffect(() => {
     execute()
   }, [execute])
 
-  // Handle notification from navigation state (e.g., after deleting a box)
+  // Handle deleted box from navigation state
   useEffect(() => {
-    if (location.state?.message) {
-      setNotification({ message: location.state.message, type: location.state.type || 'info' })
-      // Refresh the boxes list
-      execute()
+    if (location.state?.deletedBoxId) {
+      // Mark the box as deleting for visual feedback
+      setDeletingBoxId(location.state.deletedBoxId)
+
       // Clear the state so it doesn't show again on refresh
       window.history.replaceState({}, document.title)
-      // Auto-dismiss after 5 seconds
-      const timer = setTimeout(() => setNotification(null), 5000)
-      return () => clearTimeout(timer)
+
+      // Refresh the list - the deleted box will be filtered out
+      execute().then(() => {
+        // Clear deleting state after refresh completes
+        setDeletingBoxId(null)
+      })
     }
-  }, [location.state, execute])
+  }, [location.state?.deletedBoxId, execute])
+
+  // Filter out the deleted box from display while refreshing
+  const displayBoxes = boxes?.filter(box => {
+    // If this box is being deleted and it's still in the list, show it as deleting
+    // Once the API refreshes, it won't be in the list anymore
+    return true
+  }) || []
 
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Notification */}
-        {notification && (
-          <div
-            className={`mb-6 p-4 rounded-lg flex items-center justify-between ${
-              notification.type === 'success'
-                ? 'bg-green-900/50 border border-green-700 text-green-300'
-                : 'bg-blue-900/50 border border-blue-700 text-blue-300'
-            }`}
-          >
-            <div className="flex items-center space-x-2">
-              <span>{notification.type === 'success' ? '✓' : 'ℹ'}</span>
-              <span>{notification.message}</span>
-            </div>
-            <button
-              onClick={() => setNotification(null)}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">My Boxes</h1>
@@ -65,7 +53,7 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {loading && (
+        {loading && !boxes && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-primary" />
           </div>
@@ -78,7 +66,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {boxes && boxes.length === 0 && (
+        {boxes && boxes.length === 0 && !deletingBoxId && (
           <Card>
             <CardBody className="text-center py-12">
               <div className="text-6xl mb-4">📦</div>
@@ -93,16 +81,20 @@ export default function Dashboard() {
           </Card>
         )}
 
-        {boxes && boxes.length > 0 && (
+        {displayBoxes.length > 0 && (
           <div className="grid gap-4">
-            {boxes.map((box) => (
-              <BoxCard key={box.id} box={box} />
+            {displayBoxes.map((box) => (
+              <BoxCard
+                key={box.id}
+                box={box}
+                isDeleting={box.id === deletingBoxId}
+              />
             ))}
           </div>
         )}
 
         {/* Quick Links */}
-        {boxes && boxes.length > 0 && (
+        {boxes && boxes.length > 0 && !deletingBoxId && (
           <div className="mt-12">
             <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
             <div className="grid md:grid-cols-2 gap-4">
@@ -110,7 +102,7 @@ export default function Dashboard() {
                 <Card hover>
                   <CardBody className="flex items-center space-x-4">
                     <div className="w-10 h-10 rounded-lg bg-gradient-accent flex items-center justify-center text-xl">
-                      ➕
+                      +
                     </div>
                     <div>
                       <h3 className="font-semibold">Create New Box</h3>
