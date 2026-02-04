@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="clawBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DC2626"/>
+      <stop offset="100%" stop-color="#991B1B"/>
+    </linearGradient>
+    <linearGradient id="clawShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCA5A5" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#DC2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="5" y="5" width="90" height="90" rx="20" fill="url(#clawBg)"/>
+  <rect x="5" y="5" width="90" height="90" rx="20" fill="url(#clawShine)"/>
+
+  <!-- Claw shape - left pincer -->
+  <path d="M25 55 C25 45 30 35 40 35 C45 35 48 40 48 45 L48 55"
+        stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Claw shape - right pincer -->
+  <path d="M75 55 C75 45 70 35 60 35 C55 35 52 40 52 45 L52 55"
+        stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Claw base/body -->
+  <path d="M35 55 L35 70 C35 75 45 80 50 80 C55 80 65 75 65 70 L65 55"
+        stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- AI sparkle -->
+  <circle cx="78" cy="22" r="6" fill="white" opacity="0.9"/>
+  <circle cx="78" cy="22" r="3" fill="#DC2626"/>
+</svg>

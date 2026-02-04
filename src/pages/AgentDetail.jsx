@@ -68,8 +68,12 @@ export default function AgentDetail() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-start space-x-6 mb-8">
-          <div className="w-24 h-24 rounded-xl bg-gradient-accent flex items-center justify-center text-5xl flex-shrink-0">
-            🦞
+          <div className="w-24 h-24 rounded-xl bg-gradient-accent flex items-center justify-center text-5xl flex-shrink-0 overflow-hidden">
+            {agent.icon_url ? (
+              <img src={agent.icon_url} alt={agent.name} className="w-full h-full object-cover" />
+            ) : (
+              '🤖'
+            )}
           </div>
           <div>
             <h1 className="text-3xl font-bold mb-2">{agent.name}</h1>

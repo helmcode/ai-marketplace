@@ -48,14 +48,8 @@ export default function AgentSetup() {
     }
   }, [boxId, agentId])
 
-  const markAsRunning = async () => {
-    try {
-      await boxAgentsApi.update(boxId, agentId, { status: 'running' })
-      navigate(`/boxes/${boxId}`)
-    } catch (err) {
-      console.error('Failed to update status:', err)
-      navigate(`/boxes/${boxId}`)
-    }
+  const goToBox = () => {
+    navigate(`/boxes/${boxId}`)
   }
 
   if (loading) {
@@ -75,10 +69,6 @@ export default function AgentSetup() {
     )
   }
 
-  const installCommand = agent.install_script_url
-    ? `curl -fsSL ${agent.install_script_url} | bash`
-    : 'curl -fsSL https://openclaw.ai/install.sh | bash'
-
   return (
     <div className="py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,7 +76,7 @@ export default function AgentSetup() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to={`/boxes/${boxId}`} className="text-accent-primary text-sm mb-2 inline-block">
-              ← Back to {box.name}
+              &larr; Back to {box.name}
             </Link>
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold">Setup: {agent.instance_name}</h1>
@@ -94,8 +84,8 @@ export default function AgentSetup() {
             </div>
             <p className="text-gray-400 mt-1">{agent.agent_name}</p>
           </div>
-          <Button onClick={markAsRunning}>
-            Mark as Complete
+          <Button onClick={goToBox}>
+            Back to Box
           </Button>
         </div>
 
@@ -103,28 +93,24 @@ export default function AgentSetup() {
         <Card className="mb-6">
           <CardBody>
             <h3 className="font-semibold mb-2">Installing {agent.agent_name}</h3>
-            <p className="text-gray-400 mb-4">
-              The installation is running automatically below. Follow the prompts to complete the setup.
-            </p>
-            <p className="text-gray-500 text-sm">
-              Once installation is complete, click "Mark as Complete" above.
+            <p className="text-gray-400">
+              The installation is running automatically below. Once complete, you'll be able to configure the agent.
             </p>
           </CardBody>
         </Card>
 
-        {/* Terminal */}
+        {/* Terminal - uses the install-tui endpoint */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Terminal</h2>
-              <Badge variant="info">Interactive</Badge>
+              <Badge variant="info">Install + Configure</Badge>
             </div>
           </CardHeader>
           <CardBody className="p-0">
             <Terminal
-              endpoint={`/ws/terminal/${boxId}`}
+              endpoint={`/ws/install-tui/${agentId}`}
               className="h-[500px]"
-              initialCommand={installCommand}
             />
           </CardBody>
         </Card>

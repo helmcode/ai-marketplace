@@ -251,8 +251,12 @@ export default function BoxDetail() {
                         className="flex items-center justify-between p-4 bg-surface-secondary rounded-lg"
                       >
                         <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-accent flex items-center justify-center text-xl">
-                            🦞
+                          <div className="w-10 h-10 rounded-lg bg-gradient-accent flex items-center justify-center text-xl overflow-hidden">
+                            {agent.agent_icon_url ? (
+                              <img src={agent.agent_icon_url} alt={agent.agent_name} className="w-full h-full object-cover" />
+                            ) : (
+                              '🤖'
+                            )}
                           </div>
                           <div>
                             <h3 className="font-semibold">{agent.instance_name}</h3>

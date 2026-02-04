@@ -107,8 +107,12 @@ function AgentCard({ agent, runningBoxes, isAuthenticated }) {
     <Card hover className="h-full">
       <CardBody>
         <div className="flex items-start space-x-4 mb-4">
-          <div className="w-16 h-16 rounded-lg bg-gradient-accent flex items-center justify-center text-3xl flex-shrink-0">
-            🦞
+          <div className="w-16 h-16 rounded-lg bg-gradient-accent flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden">
+            {agent.icon_url ? (
+              <img src={agent.icon_url} alt={agent.name} className="w-full h-full object-cover" />
+            ) : (
+              '🤖'
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-semibold mb-1">{agent.name}</h3>

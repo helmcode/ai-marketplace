@@ -90,9 +90,6 @@ export default function AgentTUI() {
     )
   }
 
-  // Get the TUI command from agent or default to openclaw tui
-  const tuiCommand = agent.tui_command || 'openclaw tui'
-
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,7 +97,7 @@ export default function AgentTUI() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to={`/boxes/${boxId}`} className="text-accent-primary text-sm mb-2 inline-block">
-              ← Back to {box.name}
+              &larr; Back to {box.name}
             </Link>
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold">{agent.instance_name}</h1>
@@ -112,14 +109,12 @@ export default function AgentTUI() {
               {agent.agent_name}
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            <Link to={`/boxes/${boxId}`}>
-              <Button variant="secondary">Back to Box</Button>
-            </Link>
-          </div>
+          <Link to={`/boxes/${boxId}`}>
+            <Button>Back to Box</Button>
+          </Link>
         </div>
 
-        {/* Terminal */}
+        {/* Terminal - uses /ws/tui/{agentId} which runs secure command on backend */}
         <Card>
           <CardHeader className="flex items-center justify-between">
             <div>
@@ -132,9 +127,8 @@ export default function AgentTUI() {
           </CardHeader>
           <CardBody className="p-0">
             <Terminal
-              endpoint={`/ws/terminal/${boxId}`}
+              endpoint={`/ws/tui/${agentId}`}
               className="h-[600px]"
-              initialCommand={tuiCommand}
             />
           </CardBody>
         </Card>

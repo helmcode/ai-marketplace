@@ -20,6 +20,7 @@ export default function Terminal({
   const fitAddonRef = useRef(null)
   const initialCommandSentRef = useRef(false)
   const sendInputRef = useRef(null)
+  const sendResizeRef = useRef(null)
 
   const handleMessage = useCallback((data) => {
     if (!terminalRef.current) return
@@ -56,6 +57,12 @@ export default function Terminal({
     if (terminalRef.current) {
       terminalRef.current.clear()
       terminalRef.current.write('\x1b[32mConnecting...\x1b[0m\r\n')
+      // Send initial resize to sync terminal size with server
+      if (fitAddonRef.current && sendResizeRef.current) {
+        fitAddonRef.current.fit()
+        const { cols, rows } = terminalRef.current
+        sendResizeRef.current(cols, rows)
+      }
     }
     if (onConnect) onConnect()
   }, [onConnect])
@@ -81,10 +88,11 @@ export default function Terminal({
     onError: handleError
   })
 
-  // Keep sendInput ref updated
+  // Keep refs updated to avoid circular dependencies
   useEffect(() => {
     sendInputRef.current = sendInput
-  }, [sendInput])
+    sendResizeRef.current = sendResize
+  }, [sendInput, sendResize])
 
   // Initialize terminal
   useEffect(() => {

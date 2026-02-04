@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="claudeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <linearGradient id="claudeShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#F97316" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="5" y="5" width="90" height="90" rx="20" fill="url(#claudeBg)"/>
+  <rect x="5" y="5" width="90" height="90" rx="20" fill="url(#claudeShine)"/>
+
+  <!-- Code brackets < > -->
+  <path d="M30 35 L18 50 L30 65" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M70 35 L82 50 L70 65" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Slash / -->
+  <path d="M56 30 L44 70" stroke="white" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.9"/>
+
+  <!-- Sparkle/AI indicator -->
+  <circle cx="78" cy="22" r="6" fill="white" opacity="0.9"/>
+  <circle cx="78" cy="22" r="3" fill="#D97706"/>
+</svg>
