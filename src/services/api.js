@@ -49,6 +49,7 @@ export const boxesApi = {
   create: (data) => api.post('/api/boxes', data),
   update: (id, data) => api.put(`/api/boxes/${id}`, data),
   delete: (id) => api.delete(`/api/boxes/${id}`),
+  syncSsh: (id) => api.post(`/api/boxes/${id}/sync-ssh`),
 }
 
 export const boxAgentsApi = {

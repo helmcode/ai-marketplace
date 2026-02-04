@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { boxesApi, boxAgentsApi } from '../services/api'
+import { boxesApi, boxAgentsApi, usersApi } from '../services/api'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
@@ -19,21 +19,25 @@ export default function BoxDetail() {
 
   const [box, setBox] = useState(null)
   const [agents, setAgents] = useState(null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [syncingSSH, setSyncingSSH] = useState(false)
 
   const mountedRef = useRef(true)
 
-  // Load box and agents
+  // Load box, agents, and user
   const loadData = async () => {
     try {
-      const [boxRes, agentsRes] = await Promise.all([
+      const [boxRes, agentsRes, userRes] = await Promise.all([
         boxesApi.get(id),
-        boxAgentsApi.list(id)
+        boxAgentsApi.list(id),
+        usersApi.me()
       ])
       if (mountedRef.current) {
         setBox(boxRes.data)
         setAgents(agentsRes.data)
+        setUser(userRes.data)
         setError(null)
       }
     } catch (err) {
@@ -44,6 +48,19 @@ export default function BoxDetail() {
       if (mountedRef.current) {
         setLoading(false)
       }
+    }
+  }
+
+  // Sync SSH key to box
+  const handleSyncSSH = async () => {
+    setSyncingSSH(true)
+    try {
+      const res = await boxesApi.syncSsh(id)
+      setBox(res.data)
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to sync SSH key')
+    } finally {
+      setSyncingSSH(false)
     }
   }
 
@@ -201,13 +218,38 @@ export default function BoxDetail() {
                   <p className="font-medium">{box.region}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">SSH Command</p>
-                  {box.ip_address ? (
+                  <p className="text-gray-400 text-sm">SSH Access</p>
+                  {!box.ip_address ? (
+                    <p className="text-gray-500 text-sm mt-1">Available when running</p>
+                  ) : !user?.ssh_public_key ? (
+                    <div className="mt-1">
+                      <p className="text-gray-500 text-sm mb-2">
+                        Configure your SSH public key to enable SSH access
+                      </p>
+                      <Link to="/settings">
+                        <Button size="sm" variant="secondary">
+                          Configure SSH Key
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : !box.user_ssh_synced ? (
+                    <div className="mt-1">
+                      <p className="text-gray-500 text-sm mb-2">
+                        Sync your SSH key to enable access to this box
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleSyncSSH}
+                        loading={syncingSSH}
+                      >
+                        {syncingSSH ? 'Syncing...' : 'Sync SSH Key'}
+                      </Button>
+                    </div>
+                  ) : (
                     <code className="text-sm bg-gray-800 px-2 py-1 rounded block mt-1">
                       ssh root@{box.ip_address}
                     </code>
-                  ) : (
-                    <p className="text-gray-500">Available when running</p>
                   )}
                 </div>
               </CardBody>
