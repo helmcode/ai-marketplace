@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 
 export default function Header() {
-  const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0()
+  const { loginWithRedirect } = useAuth0()
   const location = useLocation()
 
   const isActive = (path) => location.pathname === path
@@ -28,52 +28,16 @@ export default function Header() {
               >
                 Marketplace
               </Link>
-              {isAuthenticated && (
-                <Link
-                  to="/dashboard"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/dashboard')
-                      ? 'text-accent-primary'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  My Agents
-                </Link>
-              )}
             </nav>
           </div>
 
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-400 hidden sm:block">
-                  {user?.email}
-                </span>
-                <Link
-                  to="/settings"
-                  className={`text-sm font-medium transition-colors ${
-                    location.pathname === '/settings'
-                      ? 'text-accent-primary'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                  className="btn-secondary text-sm"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => loginWithRedirect()}
-                className="btn-primary text-sm"
-              >
-                Login
-              </button>
-            )}
+            <button
+              onClick={() => loginWithRedirect()}
+              className="btn-primary text-sm"
+            >
+              Login
+            </button>
           </div>
         </div>
       </div>

@@ -1,7 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
+import { useAuth0 } from '@auth0/auth0-react'
 import Button from '../components/ui/Button'
 
 export default function Home() {
+  const { isAuthenticated } = useAuth0()
+
+  // Redirect to dashboard if authenticated
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   return (
     <div className="min-h-[calc(100vh-4rem)]">
       {/* Hero Section */}
