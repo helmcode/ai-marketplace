@@ -81,24 +81,35 @@ frontend/
     │   │   ├── Footer.jsx
     │   │   └── Layout.jsx          # Main layout wrapper
     │   │
-    │   └── agents/
-    │       ├── AgentCard.jsx       # Agent preview in marketplace
-    │       ├── AgentConfigForm.jsx # Dynamic config form
-    │       ├── DeploymentCard.jsx  # Deployed agent card
-    │       └── StatusBadge.jsx     # Agent status indicator
+    │   ├── boxes/
+    │   │   ├── BoxCard.jsx         # Box preview in dashboard
+    │   │   ├── BoxTierSelect.jsx   # Tier selection (basic/medium/pro)
+    │   │   ├── CreateBoxModal.jsx  # Modal to create new box
+    │   │   └── BoxStatusBadge.jsx  # Box status indicator
+    │   │
+    │   ├── agents/
+    │   │   ├── AgentCard.jsx       # Agent preview in marketplace
+    │   │   ├── AgentConfigForm.jsx # Dynamic config form
+    │   │   ├── InstalledAgentCard.jsx  # Agent installed in box
+    │   │   └── StatusBadge.jsx     # Agent status indicator
+    │   │
+    │   └── terminal/
+    │       ├── Terminal.jsx        # xterm.js terminal component
+    │       └── TerminalModal.jsx   # Full-screen terminal modal
     │
     ├── pages/
     │   ├── Home.jsx                # Landing page
-    │   ├── Marketplace.jsx         # Agent catalog
-    │   ├── AgentDetail.jsx         # Agent detail + config form
-    │   ├── Dashboard.jsx           # User's deployed agents
-    │   ├── DeploymentDetail.jsx    # Single deployment management
+    │   ├── Marketplace.jsx         # Agent catalog (browse agents)
+    │   ├── AgentDetail.jsx         # Agent detail + install to box
+    │   ├── Dashboard.jsx           # User's boxes list
+    │   ├── BoxDetail.jsx           # Single box with installed agents
     │   ├── Login.jsx               # Auth0 login redirect
     │   └── Callback.jsx            # Auth0 callback handler
     │
     ├── hooks/
     │   ├── useAuth.js              # Auth0 hook wrapper
-    │   └── useApi.js               # API calls with auth
+    │   ├── useApi.js               # API calls with auth
+    │   └── useWebSocket.js         # WebSocket hook for terminal
     │
     ├── services/
     │   └── api.js                  # Axios instance + interceptors
@@ -113,9 +124,9 @@ frontend/
 |-------|-----------|---------------|-------------|
 | `/` | Home | No | Landing page |
 | `/marketplace` | Marketplace | No | Browse available agents |
-| `/marketplace/:slug` | AgentDetail | Yes (for deploy) | Agent detail + config |
-| `/dashboard` | Dashboard | Yes | User's deployed agents |
-| `/dashboard/:id` | DeploymentDetail | Yes | Manage single deployment |
+| `/marketplace/:slug` | AgentDetail | Yes (to install) | Agent detail + install to box |
+| `/dashboard` | Dashboard | Yes | User's boxes list |
+| `/boxes/:id` | BoxDetail | Yes | Box detail with installed agents + terminal |
 | `/login` | Login | No | Redirect to Auth0 |
 | `/callback` | Callback | No | Auth0 callback |
 
@@ -178,13 +189,22 @@ export default api;
 ```javascript
 // Agents catalog
 GET  /api/agents                    // List all agents
-GET  /api/agents/:slug              // Get agent details
+GET  /api/agents/:slug              // Get agent details (install_command, tui_command)
 
-// Deployments
-GET  /api/deployments               // User's deployments
-POST /api/deployments               // Create new deployment
-GET  /api/deployments/:id           // Get deployment details
-DELETE /api/deployments/:id         // Delete deployment
+// Boxes
+GET  /api/boxes                     // User's boxes
+POST /api/boxes                     // Create new box
+GET  /api/boxes/:id                 // Get box details with agents
+DELETE /api/boxes/:id               // Delete box
+
+// Box Agents
+GET  /api/boxes/:boxId/agents       // List agents in box
+POST /api/boxes/:boxId/agents       // Install agent in box
+PUT  /api/boxes/:boxId/agents/:id/config  // Update agent config
+DELETE /api/boxes/:boxId/agents/:id // Uninstall agent
+
+// Agent Terminal (restricted - only runs agent's tui_command)
+WS   /api/boxes/:boxId/agents/:agentId/terminal  // WebSocket for agent TUI
 
 // User
 GET  /api/users/me                  // Current user profile
@@ -219,6 +239,80 @@ The agent's `config_schema` (JSON Schema) drives the configuration form:
 ```
 
 The `AgentConfigForm` component parses this schema and renders appropriate inputs.
+
+## Agent Terminal (Restricted)
+
+The Agent Terminal allows users to interact with agents directly from the browser.
+
+**Important**: This is a **restricted terminal** - it only runs the agent's `tui_command`. Users cannot execute arbitrary commands. For full shell access, they must SSH from their own machine.
+
+### Dependencies
+
+```bash
+npm install xterm xterm-addon-fit xterm-addon-web-links
+```
+
+### Terminal Component
+
+```jsx
+// src/components/terminal/AgentTerminal.jsx
+import { useEffect, useRef } from 'react';
+import { Terminal as XTerm } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import { useWebSocket } from '../../hooks/useWebSocket';
+
+export function AgentTerminal({ boxId, agentId, onClose }) {
+  const terminalRef = useRef(null);
+  const { sendMessage, lastMessage, connect, disconnect } = useWebSocket(
+    `/api/boxes/${boxId}/agents/${agentId}/terminal`
+  );
+
+  useEffect(() => {
+    const term = new XTerm({
+      theme: {
+        background: '#0a0a0f',
+        foreground: '#f8fafc',
+        cursor: '#8b5cf6',
+      },
+      fontFamily: 'JetBrains Mono, monospace',
+      fontSize: 14,
+    });
+
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(terminalRef.current);
+    fitAddon.fit();
+
+    // Send input to WebSocket (user typing in agent TUI)
+    term.onData((data) => sendMessage(data));
+
+    connect();
+
+    return () => {
+      disconnect();
+      term.dispose();
+    };
+  }, [boxId, agentId]);
+
+  return <div ref={terminalRef} className="h-full w-full" />;
+}
+```
+
+### Usage Flow
+
+1. User opens BoxDetail page
+2. Sees list of installed agents with "Chat" button
+3. Clicks "Chat" on an agent (e.g., OpenClaw)
+4. Terminal modal opens, backend automatically runs `tui_command` (e.g., `openclaw tui`)
+5. User interacts with agent in real-time
+6. User closes modal when done
+
+### Access Model
+
+| Access Type | What User Can Do | How |
+|-------------|------------------|-----|
+| UI Terminal | Interact with agent TUI only | "Chat" button in BoxDetail |
+| Full SSH | Any command, full control | SSH from user's own machine |
 
 ## Development
 
