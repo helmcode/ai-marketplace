@@ -1,25 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth0 } from '@auth0/auth0-react'
 import { usersApi } from '../services/api'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
-import Input from '../components/ui/Input'
 
 export default function Settings() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
+  const { user: auth0User } = useAuth0()
+  const [userData, setUserData] = useState(null)
   const [sshKey, setSshKey] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
 
-  // Load user data
+  // Load user data from backend (for SSH key)
   useEffect(() => {
     const loadUser = async () => {
       try {
         const res = await usersApi.me()
-        setUser(res.data)
+        setUserData(res.data)
         setSshKey(res.data.ssh_public_key || '')
       } catch (err) {
         setError(err.response?.data?.detail || 'Failed to load user data')
@@ -38,7 +39,7 @@ export default function Settings() {
 
     try {
       const res = await usersApi.update({ ssh_public_key: sshKey.trim() })
-      setUser(res.data)
+      setUserData(res.data)
       setSuccess('SSH key saved successfully!')
       // Auto-dismiss success message
       setTimeout(() => setSuccess(null), 5000)
@@ -100,7 +101,7 @@ export default function Settings() {
           <CardBody className="space-y-4">
             <div>
               <p className="text-gray-400 text-sm">Email</p>
-              <p className="font-medium">{user?.email}</p>
+              <p className="font-medium">{auth0User?.email}</p>
             </div>
           </CardBody>
         </Card>
@@ -137,7 +138,7 @@ export default function Settings() {
 
               <div className="flex items-center justify-between pt-4">
                 <div className="text-sm text-gray-400">
-                  {user?.ssh_public_key ? (
+                  {userData?.ssh_public_key ? (
                     <span className="text-green-400">✓ SSH key configured</span>
                   ) : (
                     <span className="text-yellow-400">⚠ No SSH key configured</span>
