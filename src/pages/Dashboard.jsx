@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { boxesApi } from '../services/api'
 import { useApiCall } from '../hooks/useApi'
@@ -8,8 +8,9 @@ import BoxCard from '../components/boxes/BoxCard'
 
 export default function Dashboard() {
   const location = useLocation()
-  const [deletingBoxId, setDeletingBoxId] = useState(null)
-  const { data: boxes, loading, error, execute, setData } = useApiCall(boxesApi.list)
+  const [deletedBoxIds, setDeletedBoxIds] = useState(new Set())
+  const processedRef = useRef(false)
+  const { data: boxes, loading, error, execute } = useApiCall(boxesApi.list)
 
   // Load boxes on mount
   useEffect(() => {
@@ -18,27 +19,25 @@ export default function Dashboard() {
 
   // Handle deleted box from navigation state
   useEffect(() => {
-    if (location.state?.deletedBoxId) {
-      // Mark the box as deleting for visual feedback
-      setDeletingBoxId(location.state.deletedBoxId)
+    if (location.state?.deletedBoxId && !processedRef.current) {
+      processedRef.current = true
+      const deletedId = location.state.deletedBoxId
 
-      // Clear the state so it doesn't show again on refresh
+      // Add to deleted set - this will immediately hide the box
+      setDeletedBoxIds(prev => new Set([...prev, deletedId]))
+
+      // Clear the navigation state
       window.history.replaceState({}, document.title)
-
-      // Refresh the list - the deleted box will be filtered out
-      execute().then(() => {
-        // Clear deleting state after refresh completes
-        setDeletingBoxId(null)
-      })
     }
-  }, [location.state?.deletedBoxId, execute])
+  }, [location.state?.deletedBoxId])
 
-  // Filter out the deleted box from display while refreshing
-  const displayBoxes = boxes?.filter(box => {
-    // If this box is being deleted and it's still in the list, show it as deleting
-    // Once the API refreshes, it won't be in the list anymore
-    return true
-  }) || []
+  // Reset processed ref when location changes
+  useEffect(() => {
+    processedRef.current = false
+  }, [location.key])
+
+  // Filter out deleted boxes
+  const displayBoxes = (boxes || []).filter(box => !deletedBoxIds.has(box.id))
 
   return (
     <div className="py-12">
@@ -66,7 +65,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {boxes && boxes.length === 0 && !deletingBoxId && (
+        {!loading && displayBoxes.length === 0 && (
           <Card>
             <CardBody className="text-center py-12">
               <div className="text-6xl mb-4">📦</div>
@@ -84,17 +83,13 @@ export default function Dashboard() {
         {displayBoxes.length > 0 && (
           <div className="grid gap-4">
             {displayBoxes.map((box) => (
-              <BoxCard
-                key={box.id}
-                box={box}
-                isDeleting={box.id === deletingBoxId}
-              />
+              <BoxCard key={box.id} box={box} />
             ))}
           </div>
         )}
 
         {/* Quick Links */}
-        {boxes && boxes.length > 0 && !deletingBoxId && (
+        {displayBoxes.length > 0 && (
           <div className="mt-12">
             <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
             <div className="grid md:grid-cols-2 gap-4">

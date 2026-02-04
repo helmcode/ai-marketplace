@@ -15,6 +15,7 @@ export default function TierSelector({ tiers, selectedTier, onSelect }) {
 
         return (
           <button
+            type="button"
             key={tier.tier}
             onClick={() => onSelect(tier.tier)}
             className="text-left focus:outline-none"

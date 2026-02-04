@@ -14,49 +14,41 @@ const tierNames = {
   pro: 'PRO'
 }
 
-export default function BoxCard({ box, isDeleting = false }) {
-  const displayStatus = isDeleting ? 'deleting' : box.status
-
-  const content = (
-    <Card hover={!isDeleting} className={isDeleting ? 'opacity-60' : ''}>
-      <CardBody>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-lg bg-gradient-accent flex items-center justify-center text-2xl">
-              {tierIcons[box.tier] || '📦'}
-            </div>
-            <div>
-              <h3 className="font-semibold">{box.name}</h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <span>{tierNames[box.tier] || box.tier}</span>
-                <span>•</span>
-                <span>{box.ip_address || 'Provisioning...'}</span>
+export default function BoxCard({ box }) {
+  return (
+    <Link to={`/boxes/${box.id}`}>
+      <Card hover>
+        <CardBody>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-lg bg-gradient-accent flex items-center justify-center text-2xl">
+                {tierIcons[box.tier] || '📦'}
+              </div>
+              <div>
+                <h3 className="font-semibold">{box.name}</h3>
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <span>{tierNames[box.tier] || box.tier}</span>
+                  <span>•</span>
+                  <span>{box.ip_address || 'Provisioning...'}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <StatusIndicator status={displayStatus} />
-              {box.agent_count > 0 && (
-                <p className="text-xs text-gray-400 mt-1">
-                  {box.agent_count} agent{box.agent_count !== 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
-            {!isDeleting && (
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <StatusIndicator status={box.status} />
+                {box.agent_count > 0 && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {box.agent_count} agent{box.agent_count !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
               <span className="text-accent-primary text-sm">
                 Manage →
               </span>
-            )}
+            </div>
           </div>
-        </div>
-      </CardBody>
-    </Card>
+        </CardBody>
+      </Card>
+    </Link>
   )
-
-  if (isDeleting) {
-    return <div className="cursor-not-allowed">{content}</div>
-  }
-
-  return <Link to={`/boxes/${box.id}`}>{content}</Link>
 }

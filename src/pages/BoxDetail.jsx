@@ -147,15 +147,13 @@ export default function BoxDetail() {
           </Button>
         </div>
 
-        {/* Status Message */}
-        {box.status_message && (
-          <Card className="mb-8">
+        {/* Provisioning Status - only show while box is being created */}
+        {(box.status === 'pending' || box.status === 'provisioning') && box.status_message && (
+          <Card className="mb-8 border-yellow-500/30 bg-yellow-900/10">
             <CardBody>
-              <div className="flex items-center space-x-2">
-                {(box.status === 'pending' || box.status === 'provisioning') && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-accent-primary" />
-                )}
-                <p className="text-gray-300">{box.status_message}</p>
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-yellow-500" />
+                <p className="text-yellow-200">{box.status_message}</p>
               </div>
             </CardBody>
           </Card>
