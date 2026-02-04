@@ -11,6 +11,7 @@ import BoxDetail from './pages/BoxDetail'
 import AgentInstall from './pages/AgentInstall'
 import AgentSetup from './pages/AgentSetup'
 import AgentTUI from './pages/AgentTUI'
+import Settings from './pages/Settings'
 import Callback from './pages/Callback'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -78,6 +79,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AgentTUI />
+            </ProtectedRoute>
+          }
+        />
+        {/* Settings */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />

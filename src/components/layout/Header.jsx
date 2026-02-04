@@ -49,6 +49,16 @@ export default function Header() {
                 <span className="text-sm text-gray-400 hidden sm:block">
                   {user?.email}
                 </span>
+                <Link
+                  to="/settings"
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === '/settings'
+                      ? 'text-accent-primary'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  Settings
+                </Link>
                 <button
                   onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                   className="btn-secondary text-sm"
