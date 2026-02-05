@@ -6,11 +6,14 @@ import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import TierSelector from '../components/boxes/TierSelector'
+import RegionSelector from '../components/boxes/RegionSelector'
+import { DEFAULT_REGION, getRegionDisplay } from '../utils/regionUtils'
 
 export default function BoxCreate() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [selectedTier, setSelectedTier] = useState('basic')
+  const [selectedRegion, setSelectedRegion] = useState(DEFAULT_REGION)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState(null)
 
@@ -34,7 +37,8 @@ export default function BoxCreate() {
     try {
       const response = await boxesApi.create({
         name: name.trim(),
-        tier: selectedTier
+        tier: selectedTier,
+        region: selectedRegion
       })
       navigate(`/boxes/${response.data.id}`)
     } catch (err) {
@@ -72,6 +76,22 @@ export default function BoxCreate() {
             </CardBody>
           </Card>
 
+          {/* Region Selection */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-xl font-semibold">Select Region</h2>
+              <p className="text-gray-400 text-sm mt-1">
+                Choose where your box will be located.
+              </p>
+            </CardHeader>
+            <CardBody>
+              <RegionSelector
+                selectedRegion={selectedRegion}
+                onSelect={setSelectedRegion}
+              />
+            </CardBody>
+          </Card>
+
           {/* Tier Selection */}
           <Card>
             <CardHeader>
@@ -104,7 +124,7 @@ export default function BoxCreate() {
                     {name || 'Unnamed Box'} - {selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}
                   </h3>
                   <p className="text-gray-400 text-sm">
-                    Ready for AI agents
+                    {getRegionDisplay(selectedRegion)} • Ready for AI agents
                   </p>
                 </div>
                 <div className="text-right">

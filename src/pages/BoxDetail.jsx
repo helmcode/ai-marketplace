@@ -4,6 +4,7 @@ import { boxesApi, boxAgentsApi, usersApi } from '../services/api'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import StatusIndicator from '../components/ui/StatusIndicator'
+import { getRegionDisplay } from '../utils/regionUtils'
 
 const tierNames = {
   basic: 'Basic',
@@ -136,7 +137,7 @@ export default function BoxDetail() {
               <StatusIndicator status={box.status} />
             </div>
             <p className="text-gray-400">
-              {tierNames[box.tier] || box.tier} • {box.region}
+              {tierNames[box.tier] || box.tier} • {getRegionDisplay(box.region)}
             </p>
           </div>
           <Button
@@ -183,7 +184,7 @@ export default function BoxDetail() {
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">Region</p>
-                  <p className="font-medium">{box.region}</p>
+                  <p className="font-medium">{getRegionDisplay(box.region)}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">SSH Access</p>

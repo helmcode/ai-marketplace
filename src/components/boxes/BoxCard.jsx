@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Card, { CardBody } from '../ui/Card'
 import StatusIndicator from '../ui/StatusIndicator'
+import { getRegionDisplay } from '../../utils/regionUtils'
 
 const tierIcons = {
   basic: '📦',
@@ -28,6 +29,8 @@ export default function BoxCard({ box }) {
                 <h3 className="font-semibold">{box.name}</h3>
                 <div className="flex items-center space-x-2 text-sm text-gray-400">
                   <span>{tierNames[box.tier] || box.tier}</span>
+                  <span>•</span>
+                  <span>{getRegionDisplay(box.region)}</span>
                   <span>•</span>
                   <span>{box.ip_address || 'Provisioning...'}</span>
                 </div>
