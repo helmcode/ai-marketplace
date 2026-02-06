@@ -42,7 +42,7 @@ export default function Home() {
       <section className="py-20 border-t border-surface-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12">
-            Why Choose Our Platform?
+            Why Choose <span className="gradient-text">Boxes</span>?
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">

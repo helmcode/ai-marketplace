@@ -1,10 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#a78bfa" />
+      <stop offset="50%" style="stop-color:#8b5cf6" />
+      <stop offset="100%" style="stop-color:#6d28d9" />
+    </linearGradient>
+    <linearGradient id="gradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4b5fd" />
+      <stop offset="100%" style="stop-color:#a78bfa" />
+    </linearGradient>
+    <linearGradient id="gradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed" />
+      <stop offset="100%" style="stop-color:#5b21b6" />
     </linearGradient>
   </defs>
-  <circle cx="50" cy="50" r="45" fill="url(#grad)"/>
-  <text x="50" y="65" font-size="50" text-anchor="middle" fill="white">🤖</text>
+  <!-- Top face -->
+  <polygon points="50,15 85,35 50,55 15,35" fill="url(#gradLight)" />
+  <!-- Left face -->
+  <polygon points="15,35 50,55 50,85 15,65" fill="url(#grad)" />
+  <!-- Right face -->
+  <polygon points="85,35 50,55 50,85 85,65" fill="url(#gradDark)" />
 </svg>

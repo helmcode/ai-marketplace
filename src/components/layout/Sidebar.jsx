@@ -73,8 +73,8 @@ export default function Sidebar({ onSettingsClick, onClose }) {
           onClick={handleNavClick}
           className="flex items-center space-x-3"
         >
-          <span className="text-2xl">🤖</span>
-          <span className="font-bold text-lg gradient-text">AI Marketplace</span>
+          <img src="/favicon.svg" alt="Boxes" className="w-7 h-7" />
+          <span className="font-bold text-lg gradient-text">Boxes</span>
         </Link>
       </div>
 

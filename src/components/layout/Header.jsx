@@ -13,8 +13,8 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-2xl">🤖</span>
-              <span className="font-bold text-lg gradient-text">AI Marketplace</span>
+              <img src="/favicon.svg" alt="Boxes" className="w-7 h-7" />
+              <span className="font-bold text-lg gradient-text">Boxes</span>
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6">

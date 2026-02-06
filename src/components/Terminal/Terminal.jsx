@@ -156,9 +156,9 @@ export default function Terminal({
     window.addEventListener('resize', handleResize)
 
     // Initial welcome message
-    terminal.write('\x1b[35m┌─────────────────────────────────────┐\x1b[0m\r\n')
-    terminal.write('\x1b[35m│\x1b[0m  \x1b[1mAI Agent Marketplace Terminal\x1b[0m      \x1b[35m│\x1b[0m\r\n')
-    terminal.write('\x1b[35m└─────────────────────────────────────┘\x1b[0m\r\n\r\n')
+    terminal.write('\x1b[35m┌──────────────────────────┐\x1b[0m\r\n')
+    terminal.write('\x1b[35m│\x1b[0m  \x1b[1mBoxes Terminal\x1b[0m           \x1b[35m│\x1b[0m\r\n')
+    terminal.write('\x1b[35m└──────────────────────────┘\x1b[0m\r\n\r\n')
 
     // Auto-connect if enabled
     if (autoConnect) {

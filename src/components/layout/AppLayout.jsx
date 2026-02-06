@@ -21,8 +21,8 @@ export default function AppLayout({ children }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-background-secondary border-b border-surface-border">
         <div className="flex items-center justify-between h-16 px-4">
           <Link to="/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl">🤖</span>
-            <span className="font-bold gradient-text">AI Marketplace</span>
+            <img src="/favicon.svg" alt="Boxes" className="w-6 h-6" />
+            <span className="font-bold gradient-text">Boxes</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(true)}

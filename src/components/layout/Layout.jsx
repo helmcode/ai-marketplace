@@ -13,7 +13,7 @@ export default function Layout({ children }) {
       <footer className="border-t border-surface-border py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm">
-            AI Agent Marketplace - Deploy AI agents with one click
+            &copy; By <a href="https://helmcode.com/" target="_blank" rel="noopener noreferrer" className="text-accent-secondary hover:text-accent-primary transition-colors">Helmcode</a>
           </p>
         </div>
       </footer>
