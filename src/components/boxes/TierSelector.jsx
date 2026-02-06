@@ -1,6 +1,7 @@
 import Card, { CardBody } from '../ui/Card'
 
 const tierIcons = {
+  starter: '🌱',
   basic: '📦',
   medium: '🚀',
   pro: '⚡'
@@ -8,7 +9,7 @@ const tierIcons = {
 
 export default function TierSelector({ tiers, selectedTier, onSelect }) {
   return (
-    <div className="grid md:grid-cols-3 gap-4">
+    <div className="grid md:grid-cols-4 gap-4">
       {tiers.map((tier) => {
         const isSelected = selectedTier === tier.tier
         const pricePerMonth = tier.price_cents / 100

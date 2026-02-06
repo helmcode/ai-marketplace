@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tiersApi, boxesApi } from '../services/api'
+import { useAuth0 } from '@auth0/auth0-react'
+import { tiersApi, billingApi } from '../services/api'
 import { useApiCall } from '../hooks/useApi'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -11,8 +12,9 @@ import { DEFAULT_REGION, getRegionDisplay } from '../utils/regionUtils'
 
 export default function BoxCreate() {
   const navigate = useNavigate()
+  const { user: auth0User } = useAuth0()
   const [name, setName] = useState('')
-  const [selectedTier, setSelectedTier] = useState('basic')
+  const [selectedTier, setSelectedTier] = useState('starter')
   const [selectedRegion, setSelectedRegion] = useState(DEFAULT_REGION)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState(null)
@@ -35,14 +37,15 @@ export default function BoxCreate() {
     setError(null)
 
     try {
-      const response = await boxesApi.create({
-        name: name.trim(),
+      const response = await billingApi.createCheckoutSession({
+        box_name: name.trim(),
         tier: selectedTier,
-        region: selectedRegion
+        region: selectedRegion,
+        email: auth0User?.email || null
       })
-      navigate(`/boxes/${response.data.id}`)
+      window.location.href = response.data.checkout_url
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create box')
+      setError('Something went wrong. Please try again.')
       setCreating(false)
     }
   }
@@ -155,7 +158,7 @@ export default function BoxCreate() {
               loading={creating}
               disabled={!name.trim() || creating}
             >
-              {creating ? 'Creating Box...' : 'Create Box'}
+              {creating ? 'Redirecting to payment...' : 'Subscribe & Create Box'}
             </Button>
           </div>
         </form>

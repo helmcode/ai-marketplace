@@ -61,6 +61,11 @@ export const boxAgentsApi = {
   getLog: (boxId, agentId) => api.get(`/api/boxes/${boxId}/agents/${agentId}/log`),
 }
 
+export const billingApi = {
+  createCheckoutSession: (data) => api.post('/api/billing/checkout-session', data),
+  createPortalSession: () => api.post('/api/billing/customer-portal'),
+}
+
 export const usersApi = {
   me: () => api.get('/api/users/me'),
   update: (data) => api.put('/api/users/me', data),

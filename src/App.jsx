@@ -13,6 +13,7 @@ import AgentInstall from './pages/AgentInstall'
 import AgentSetup from './pages/AgentSetup'
 import AgentTUI from './pages/AgentTUI'
 import Callback from './pages/Callback'
+import BillingSuccess from './pages/BillingSuccess'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -90,6 +91,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/billing/success"
+            element={
+              <ProtectedRoute>
+                <BillingSuccess />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </AppLayout>
     )
@@ -115,6 +124,14 @@ function App() {
         />
         <Route
           path="/boxes/*"
+          element={
+            <ProtectedRoute>
+              <div />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/billing/*"
           element={
             <ProtectedRoute>
               <div />
