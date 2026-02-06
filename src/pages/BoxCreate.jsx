@@ -14,7 +14,7 @@ export default function BoxCreate() {
   const navigate = useNavigate()
   const { user: auth0User } = useAuth0()
   const [name, setName] = useState('')
-  const [selectedTier, setSelectedTier] = useState('starter')
+  const [selectedTier, setSelectedTier] = useState('basic')
   const [selectedRegion, setSelectedRegion] = useState(DEFAULT_REGION)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState(null)
@@ -43,7 +43,14 @@ export default function BoxCreate() {
         region: selectedRegion,
         email: auth0User?.email || null
       })
-      window.location.href = response.data.checkout_url
+
+      if (response.data.reused_subscription) {
+        // Subscription reused — box created directly, go to dashboard
+        navigate('/dashboard')
+      } else {
+        // New subscription — redirect to Stripe Checkout
+        window.location.href = response.data.checkout_url
+      }
     } catch (err) {
       setError('Something went wrong. Please try again.')
       setCreating(false)

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { boxesApi, boxAgentsApi, usersApi } from '../services/api'
+import { boxesApi, boxAgentsApi, usersApi, billingApi } from '../services/api'
 import Card, { CardBody, CardHeader } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import StatusIndicator from '../components/ui/StatusIndicator'
@@ -24,6 +24,7 @@ export default function BoxDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [syncingSSH, setSyncingSSH] = useState(false)
+  const [billingLoading, setBillingLoading] = useState(false)
 
   const mountedRef = useRef(true)
 
@@ -105,6 +106,18 @@ export default function BoxDetail() {
   }
 
 
+  const handleManageBilling = async () => {
+    setBillingLoading(true)
+    try {
+      const res = await billingApi.createPortalSession()
+      window.location.href = res.data.portal_url
+    } catch (err) {
+      setError('Failed to open billing portal')
+    } finally {
+      setBillingLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -155,6 +168,69 @@ export default function BoxDetail() {
               <div className="flex items-center space-x-3">
                 <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-yellow-500" />
                 <p className="text-yellow-200">{box.status_message}</p>
+              </div>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Subscription Canceling Warning (orange) */}
+        {box.subscription_status === 'canceling' && (
+          <Card className="mb-8 border-orange-500/30 bg-orange-900/10">
+            <CardBody>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-5 h-5 text-orange-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <div>
+                    <p className="text-orange-200 font-medium">Subscription canceling</p>
+                    <p className="text-orange-300/70 text-sm">
+                      Your subscription will end on{' '}
+                      <strong>{box.subscription_cancel_at ? new Date(box.subscription_cancel_at).toLocaleDateString() : 'the end of the billing period'}</strong>.
+                      After that, the box will enter a 3-day grace period before being deleted.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleManageBilling}
+                  loading={billingLoading}
+                  className="ml-4 flex-shrink-0"
+                >
+                  Reactivate
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Subscription Grace Period Warning (red) */}
+        {box.subscription_status === 'grace_period' && (
+          <Card className="mb-8 border-red-500/30 bg-red-900/10">
+            <CardBody>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-red-200 font-medium">Box scheduled for deletion</p>
+                    <p className="text-red-300/70 text-sm">
+                      Your subscription has ended. This box will be permanently deleted on{' '}
+                      <strong>{box.subscription_grace_period_end ? new Date(box.subscription_grace_period_end).toLocaleDateString() : 'soon'}</strong>.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleManageBilling}
+                  loading={billingLoading}
+                  className="ml-4 flex-shrink-0"
+                >
+                  Manage Billing
+                </Button>
               </div>
             </CardBody>
           </Card>
