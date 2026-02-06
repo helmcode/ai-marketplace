@@ -82,10 +82,11 @@ frontend/
     │   │   └── Layout.jsx          # Main layout wrapper
     │   │
     │   ├── boxes/
-    │   │   ├── BoxCard.jsx         # Box preview in dashboard
-    │   │   ├── BoxTierSelect.jsx   # Tier selection (basic/medium/pro)
-    │   │   ├── CreateBoxModal.jsx  # Modal to create new box
-    │   │   └── BoxStatusBadge.jsx  # Box status indicator
+    │   │   ├── TierSelector.jsx    # Tier selection (basic/medium/pro)
+    │   │   └── RegionSelector.jsx  # Region selection (US/EU)
+    │   │
+    │   ├── modals/
+    │   │   └── SettingsModal.jsx   # Settings (Profile, SSH, Billing)
     │   │
     │   ├── agents/
     │   │   ├── AgentCard.jsx       # Agent preview in marketplace
@@ -103,6 +104,8 @@ frontend/
     │   ├── AgentDetail.jsx         # Agent detail + install to box
     │   ├── Dashboard.jsx           # User's boxes list
     │   ├── BoxDetail.jsx           # Single box with installed agents
+    │   ├── BoxCreate.jsx           # Create box with Stripe checkout
+    │   ├── BillingSuccess.jsx      # Post-payment success page
     │   ├── Login.jsx               # Auth0 login redirect
     │   └── Callback.jsx            # Auth0 callback handler
     │
@@ -127,6 +130,8 @@ frontend/
 | `/marketplace/:slug` | AgentDetail | Yes (to install) | Agent detail + install to box |
 | `/dashboard` | Dashboard | Yes | User's boxes list |
 | `/boxes/:id` | BoxDetail | Yes | Box detail with installed agents + terminal |
+| `/boxes/create` | BoxCreate | Yes | Create box with Stripe checkout |
+| `/billing/success` | BillingSuccess | Yes | Post-payment success + redirect |
 | `/login` | Login | No | Redirect to Auth0 |
 | `/callback` | Callback | No | Auth0 callback |
 
@@ -193,9 +198,13 @@ GET  /api/agents/:slug              // Get agent details (install_command, tui_c
 
 // Boxes
 GET  /api/boxes                     // User's boxes
-POST /api/boxes                     // Create new box
-GET  /api/boxes/:id                 // Get box details with agents
-DELETE /api/boxes/:id               // Delete box
+GET  /api/boxes/:id                 // Get box details (includes subscription status)
+POST /api/boxes/:id/sync-ssh        // Sync SSH key to box
+DELETE /api/boxes/:id               // Delete box (detaches subscription)
+
+// Billing
+POST /api/billing/checkout-session  // Create Stripe Checkout or reuse subscription
+POST /api/billing/customer-portal   // Open Stripe Customer Portal
 
 // Box Agents
 GET  /api/boxes/:boxId/agents       // List agents in box
